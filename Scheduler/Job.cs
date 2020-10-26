@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Timers;
+using static Scheduler.MainScheduler;
 
 namespace Scheduler
 {
@@ -10,6 +11,6 @@ namespace Scheduler
         public Timer Timer { get; set; }
         public Object Obj { get; set; }
         public DateTime DateTime { get; set; }
-        public string Type { get; set; }
+        public TaskType Type { get; set; }
     }
 }

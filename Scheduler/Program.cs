@@ -27,7 +27,13 @@ namespace Scheduler
             scheduler.AddJob(1,"First Job",time);
 
             // criar uma task diaria para executar sempre as 19:08:45
-            scheduler.AddDailyTask(2, "First Daily Task", "19:08:45");
+            scheduler.AddDailyTask(2, "First Daily Task", "16:20:00");
+
+            // define intervalo de 15 segundos
+            TimeSpan Interval = new TimeSpan(0, 0, 1);
+
+            //cria uma task de intervalos que começara em 20 segundos e será executado a cada 1 segundo.
+            scheduler.AddIntervalTask(3,"First Interval Task",time,Interval);
 
             // inicia o scheduler
             scheduler.Init();

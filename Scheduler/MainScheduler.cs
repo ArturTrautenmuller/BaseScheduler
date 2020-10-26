@@ -11,6 +11,7 @@ namespace Scheduler
         {
             this.Jobs = new Dictionary<int, Job>();
             this.DailyTasks = new Dictionary<int, DailyTask>();
+            this.IntervalTasks = new Dictionary<int, IntervalTask>();
             this.refreshTime = refreshTime;
             
 
@@ -24,6 +25,8 @@ namespace Scheduler
             RefreshTimer.Interval = this.refreshTime;
             RefreshTimer.Enabled = true;
         }
+
+        public enum TaskType {Normal = 0, Daily = 1, Interval = 2 }
 
         public delegate void Execute(Object taskData);
 
@@ -39,9 +42,11 @@ namespace Scheduler
 
         public Dictionary<int,DailyTask> DailyTasks { get; set; }
 
+        public Dictionary<int, IntervalTask> IntervalTasks { get; set; }
+
         private Timer RefreshTimer { get; set; }
 
-        public void AddJob(int Id, Object obj , DateTime time, string type = "normal")
+        public void AddJob(int Id, Object obj , DateTime time,TaskType type = TaskType.Normal)
         {
            
             var taskTimer = new Timer();
@@ -86,7 +91,7 @@ namespace Scheduler
                 dateTime.AddDays(1);
             }
 
-            AddJob(Id, obj, dateTime,"daily");
+            AddJob(Id, obj, dateTime,TaskType.Daily);
 
 
         }
@@ -97,12 +102,30 @@ namespace Scheduler
             RemoveJob(Id);
         }
 
+        public void AddIntervalTask(int Id,Object obj,DateTime firstExecution,TimeSpan interval)
+        {
+            IntervalTask intervalTask = new IntervalTask();
+            intervalTask.JobId = Id;
+            intervalTask.NextExecution = firstExecution;
+            intervalTask.Interval = interval;
+
+            this.IntervalTasks.Add(Id,intervalTask);
+
+            AddJob(Id, obj, firstExecution, TaskType.Interval);
+        }
+
+        public void RemoveIntervalTask(int Id)
+        {
+            IntervalTasks.Remove(Id);
+            RemoveJob(Id);
+        }
+
         public void FinnishJob(int Id)
         {
 
             switch (Jobs[Id].Type)
             {
-                case "daily": {
+                case TaskType.Daily: {
                         DateTime dateTime = Convert.ToDateTime(DailyTasks[Id].Time);
                         if (DateTime.Compare(dateTime, DateTime.Now.AddSeconds(1)) < 0)
                         {
@@ -110,7 +133,16 @@ namespace Scheduler
                         }
                         Object obj = Jobs[Id].Obj;
                         RemoveJob(Id);
-                        AddJob(Id, obj, dateTime, "daily");
+                        AddJob(Id, obj, dateTime, TaskType.Daily);
+
+                        break;
+                    }
+                case TaskType.Interval:
+                    {
+                        IntervalTasks[Id].NextExecution = IntervalTasks[Id].NextExecution.Add(IntervalTasks[Id].Interval);
+                        Object obj = Jobs[Id].Obj;
+                        RemoveJob(Id);
+                        AddJob(Id, obj, IntervalTasks[Id].NextExecution, TaskType.Interval);
 
                         break;
                     }

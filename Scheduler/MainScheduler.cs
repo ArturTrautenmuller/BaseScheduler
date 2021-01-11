@@ -88,7 +88,7 @@ namespace Scheduler
             DateTime dateTime = Convert.ToDateTime(time);
             if(DateTime.Compare(dateTime,DateTime.Now) < 0)
             {
-                dateTime.AddDays(1);
+                dateTime = dateTime.AddDays(1);
             }
 
             AddJob(Id, obj, dateTime,TaskType.Daily);
